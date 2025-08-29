@@ -35,6 +35,7 @@ pipeline {
         REGISTRY_CREDENTIALS = credentials('Docker-cred')
       }
       steps {
+        def imageTag = "${BUILD_NUMBER}"
         sh '''
           docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:$latest .
           echo "${REGISTRY_CREDENTIALS_PSW}" | docker login -u "${REGISTRY_CREDENTIALS_USR}" --password-stdin
