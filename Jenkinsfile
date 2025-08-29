@@ -31,11 +31,12 @@ pipeline {
 
     stage('Build & Push Docker Image') {
       environment {
+        IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE = "maheshprince/firstwebapp"
         REGISTRY_CREDENTIALS = credentials('Docker-cred')
       }
       steps {
-        def IMAGE_TAG = "${BUILD_NUMBER}"
+         
         sh '''
           docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
           echo "${REGISTRY_CREDENTIALS_PSW}" | docker login -u "${REGISTRY_CREDENTIALS_USR}" --password-stdin
