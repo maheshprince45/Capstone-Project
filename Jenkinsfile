@@ -61,7 +61,6 @@ pipeline {
     }
 
     stage('Configure EC2 with Ansible (Kubernetes)') {
-      when { expression { return !params.DESTROY_INFRA } }
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
                                            keyFileVariable: 'SSH_KEY',
@@ -83,7 +82,6 @@ pipeline {
     }
 
     stage('Deploy with Helm') {
-      when { expression { return !params.DESTROY_INFRA } }
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
                                            keyFileVariable: 'SSH_KEY',
@@ -109,19 +107,6 @@ pipeline {
       }
     }
 
-    stage('Terraform Destroy (optional)') {
-      when { expression { return params.DESTROY_INFRA } }
-      environment { AWS_DEFAULT_REGION = "${AWS_REGION}" }
-      steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-          dir('infra') {
-            sh '''
-              terraform init -input=false
-              terraform destroy -auto-approve
-            '''
-          }
-        }
-      }
-    }
+   
   }
 }
