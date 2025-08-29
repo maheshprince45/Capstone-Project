@@ -97,7 +97,6 @@ resource "aws_instance" "ubuntu_host" {
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.sg.id]
-  availability_zone           = "us-east-1a"
   key_name                    = var.ssh_key_name
   associate_public_ip_address = true
 
