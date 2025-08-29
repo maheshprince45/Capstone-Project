@@ -86,20 +86,7 @@ pipeline {
         }
       }
     }
-    stage('Terraform Destroy (optional)') {
-  when { expression { return params.DESTROY_INFRA } }
-  steps {
-    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-      dir('terraform') {
-        sh '''
-          terraform init -input=false
-          terraform destroy -auto-approve
-        '''
-      }
-    }
-  }
-}
-
+  
     stage('Deploy with Helm') {
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
