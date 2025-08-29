@@ -97,7 +97,7 @@ resource "aws_instance" "ubuntu_host" {
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.sg.id]
-  key_name                    = aws_key_pair.ansible_key.key_name
+  key_name                    = var.ssh_key_name
   associate_public_ip_address = true
 
   tags = merge(local.tags, { Name = "${var.project}-ubuntu-k8s" })
