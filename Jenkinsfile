@@ -19,7 +19,7 @@ pipeline {
     stage('Checkout') {
       steps {
         git credentialsId: 'Git-cred',
-            url: 'https://github.com/<your-org>/<your-repo>.git',
+            url: 'https://github.com/maheshprince45/Capstone-Project.git',
             branch: 'master'
       }
     }
