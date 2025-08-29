@@ -5,7 +5,9 @@ pipeline {
     timestamps()
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
-
+  parameters {
+    booleanParam(name: 'DESTROY_INFRA', defaultValue: false, description: 'Destroy infra after pipeline')
+  }
   
 
   environment {
@@ -47,6 +49,7 @@ pipeline {
     }
 
     stage('Terraform Provision EC2 (Ubuntu)') {
+      when { expression { return !params.DESTROY_INFRA } }
       environment { AWS_DEFAULT_REGION = "${AWS_REGION}" }
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
@@ -63,6 +66,7 @@ pipeline {
     }
 
     stage('Configure EC2 with Ansible (Kubernetes)') {
+      when { expression { return !params.DESTROY_INFRA } }
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
                                            keyFileVariable: 'SSH_KEY',
@@ -121,7 +125,22 @@ pipeline {
         }
       }
     }
+    stage('Terraform Destroy (optional)') {
+      when { expression { return params.DESTROY_INFRA } }
+      environment { AWS_DEFAULT_REGION = "${AWS_REGION}" }
+      steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
+          dir('infra') {
+            sh '''
+              terraform init -input=false
+              terraform destroy -auto-approve
+            '''
+          }
+        }
+      }
 
    
   }
 }
+}
+  
