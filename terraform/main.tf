@@ -91,13 +91,6 @@ resource "aws_security_group" "sg" {
   tags = merge(local.tags, { Name = "${var.project}-sg" })
 }
 
-# SSH key pair (inject your PUBLIC key)
-resource "aws_key_pair" "ansible_key" {
-  key_name   = var.ssh_key_name
-  public_key = file(var.ssh_public_key_path)
-  tags       = local.tags
-}
-
 
 resource "aws_instance" "ubuntu_host" {
   ami                         = "ami-0261755bbcb8c4a84"
