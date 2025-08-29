@@ -36,7 +36,7 @@ pipeline {
       }
       steps {
         sh '''
-          docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:rolling .
+          docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:$latest .
           echo "${REGISTRY_CREDENTIALS_PSW}" | docker login -u "${REGISTRY_CREDENTIALS_USR}" --password-stdin
           docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
           docker push ${DOCKER_IMAGE}:rolling
