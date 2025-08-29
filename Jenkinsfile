@@ -6,9 +6,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
-  parameters {
-    booleanParam(name: 'DESTROY_INFRA', defaultValue: false, description: 'Destroy infra after pipeline')
-  }
+  
 
   environment {
     IMAGE_TAG = "${BUILD_NUMBER}"
@@ -47,7 +45,6 @@ pipeline {
     }
 
     stage('Terraform Provision EC2 (Ubuntu)') {
-      when { expression { return !params.DESTROY_INFRA } }
       environment { AWS_DEFAULT_REGION = "${AWS_REGION}" }
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
