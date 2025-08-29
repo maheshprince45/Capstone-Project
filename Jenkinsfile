@@ -127,23 +127,4 @@ pipeline {
       }
     }
   }
-
-  post {
-    success {
-      emailext(
-        subject: "✅ SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-        body: """<p>Deployed version <b>${IMAGE_TAG}</b> successfully.</p>
-                 <p>NodePort URL (if infra kept): http://$(cat ec2_ip.txt):30080/</p>""",
-        to: "your-team@company.com"
-      )
-    }
-    failure {
-      emailext(
-        subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-        body: """<p>Job failed at stage: ${env.STAGE_NAME}</p>
-                 <p>Logs: ${env.BUILD_URL}</p>""",
-        to: "your-team@company.com"
-      )
-    }
-  }
 }
