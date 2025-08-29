@@ -50,7 +50,7 @@ pipeline {
       environment { AWS_DEFAULT_REGION = "${AWS_REGION}" }
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-          dir('infra') {
+          dir('terraform') {
             sh '''
               terraform init -input=false
               terraform validate
