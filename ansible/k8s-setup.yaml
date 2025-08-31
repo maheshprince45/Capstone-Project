@@ -121,12 +121,15 @@
         creates: /etc/kubernetes/admin.conf
 
     - name: Create kube config for ubuntu user
-      copy:
-        src: /etc/kubernetes/admin.conf
-        dest: /home/ubuntu/.kube/config
-        owner: ubuntu
-        group: ubuntu
-        mode: '0644'
+  become: yes
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
 
     - name: Install Flannel CNI
       become_user: ubuntu
@@ -144,4 +147,5 @@
       shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       args:
         creates: /usr/local/bin/helm
+
 
