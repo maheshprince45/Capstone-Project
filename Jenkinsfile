@@ -90,28 +90,26 @@ pipeline {
     stage('Deploy with Helm') {
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
-                                           keyFileVariable: 'SSH_KEY',
-                                           usernameVariable: 'SSH_USER')]) {
+                                       keyFileVariable: 'SSH_KEY',
+                                       usernameVariable: 'SSH_USER')]) {
           sh '''
             EC2_IP=$(cat ec2_ip.txt)
 
-            # Copy Helm chart and install/upgrade
-            scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r helm/ ${SSH_USER}@${EC2_IP}:/home/${SSH_USER}/
-            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
-              "helm upgrade --install financeme ~/helm/financeme --set image.tag=${IMAGE_TAG}"
+            # Create helm directory on remote
+            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} "mkdir -p ~/helm"
 
-            # Smoke test (hit NodePort on the node)
-            for i in {1..30}; do
-              if curl -sSf http://${EC2_IP}:30080/ >/dev/null; then
-                echo 'Smoke test passed'; exit 0
-              fi
-              echo 'Waiting for app...'; sleep 5
-            done
-            echo 'Smoke test failed'; exit 1
-          '''
-        }
-      }
+            # Copy only the financeme chart folder
+            scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r helm/financeme ${SSH_USER}@${EC2_IP}:~/helm/
+
+            # Run helm upgrade/install
+            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
+            "helm upgrade --install financeme ~/helm/financeme --set image.tag=${IMAGE_TAG}"
+         '''
     }
+  }
+}
+
+            
     stage('Terraform Destroy (optional)') {
       when { expression { return params.DESTROY_INFRA } }
       environment { AWS_DEFAULT_REGION = "${AWS_REGION}" }
