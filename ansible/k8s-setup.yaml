@@ -129,22 +129,25 @@
     owner: ubuntu
     group: ubuntu
     mode: '0644'
-    - name: Install Flannel CNI
-      become_user: ubuntu
-      command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-      environment:
-        KUBECONFIG: /home/ubuntu/.kube/config
-        
-    - name: Remove master taint to allow scheduling pods
-      become_user: ubuntu
-      command: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
-      environment:
-        KUBECONFIG: /home/ubuntu/.kube/config
 
-    - name: Install Helm
-      shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      args:
-        creates: /usr/local/bin/helm
+- name: Install Flannel CNI
+  become_user: ubuntu
+  command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: Remove master taint to allow scheduling pods
+  become_user: ubuntu
+  command: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: Install Helm
+  shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    creates: /usr/local/bin/helm
+
+
 
 
 
