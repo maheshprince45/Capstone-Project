@@ -118,6 +118,13 @@
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       args:
         creates: /etc/kubernetes/admin.conf
+    - name: Create .kube directory for ubuntu user
+      file:
+        path: /home/ubuntu/.kube
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
 
     - name: Create kube config for ubuntu user
       copy:
@@ -144,3 +151,4 @@
       shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       args:
         creates: /usr/local/bin/helm
+
