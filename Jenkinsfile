@@ -103,7 +103,7 @@ pipeline {
 
             # Run helm upgrade/install
             ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
-            "helm upgrade --install financeme ~/helm/financeme --set image.tag=${IMAGE_TAG}"
+            "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG}"
          '''
     }
   }
