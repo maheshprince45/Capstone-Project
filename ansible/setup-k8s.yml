@@ -83,7 +83,7 @@
       apt:
         name: "{{ item }}"
         state: present
-        lock: yes
+        
       loop:
         - kubelet
         - kubeadm
@@ -111,3 +111,4 @@
     - name: Install Helm
       shell: |
         curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
