@@ -81,7 +81,7 @@ pipeline {
               echo "waiting for SSH..."; sleep 10
             done
 
-            ansible-playbook -i ansible/inventory.ini ansible/k8s-setup.yaml
+            ansible-playbook -i ansible/inventory.ini ansible/setup-k8s.yml
           '''
         }
       }
