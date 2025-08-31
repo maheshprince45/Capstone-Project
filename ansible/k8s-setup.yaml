@@ -121,7 +121,6 @@
         creates: /etc/kubernetes/admin.conf
 
     - name: Create kube config for ubuntu user
-  become: yes
   copy:
     src: /etc/kubernetes/admin.conf
     dest: /home/ubuntu/.kube/config
@@ -146,6 +145,7 @@
   shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   args:
     creates: /usr/local/bin/helm
+
 
 
 
