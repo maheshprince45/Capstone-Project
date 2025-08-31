@@ -99,7 +99,7 @@ pipeline {
             ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} "mkdir -p ~/helm"
 
             # Copy only the financeme chart folder
-            scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r helm/financeme ${SSH_USER}@${EC2_IP}:~/helm/
+            scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r Helm/financeme ${SSH_USER}@${EC2_IP}:~/helm/
 
             # Run helm upgrade/install
             ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
