@@ -3,7 +3,10 @@
   become: yes
 
   tasks:
-    - name: Apt update/upgrade
+    # -----------------------
+    # System prep
+    # -----------------------
+    - name: Update and upgrade apt packages
       apt:
         update_cache: yes
         upgrade: yes
@@ -23,12 +26,15 @@
           - unzip
         state: present
 
+    # -----------------------
+    # Docker installation
+    # -----------------------
     - name: Install Docker
       apt:
         name: docker.io
         state: present
 
-    - name: Enable and start Docker
+    - name: Ensure Docker is started and enabled
       service:
         name: docker
         state: started
@@ -40,10 +46,13 @@
         groups: docker
         append: yes
 
-    # Kube prerequisites
+    # -----------------------
+    # Swap and networking
+    # -----------------------
     - name: Disable swap
       command: swapoff -a
       when: ansible_swaptotal_mb | int > 0
+
     - name: Remove swap from fstab
       replace:
         path: /etc/fstab
@@ -62,14 +71,28 @@
           net.bridge.bridge-nf-call-iptables  = 1
           net.bridge.bridge-nf-call-ip6tables = 1
           net.ipv4.ip_forward                 = 1
-    - name: Apply sysctl
+
+    - name: Apply sysctl settings
       command: sysctl --system
 
-    - name: Add Kubernetes apt key & repo
-      shell: |
-        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | gpg --dearmor -o /usr/share/keyrings/kubernetes-apt-keyring.gpg
-        echo 'deb [signed-by=/usr/share/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' > /etc/apt/sources.list.d/kubernetes.list
-        apt-get update
+    # -----------------------
+    # Kubernetes installation
+    # -----------------------
+    - name: Add Kubernetes GPG key
+      ansible.builtin.apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+        keyring: /usr/share/keyrings/kubernetes-apt-keyring.gpg
+        state: present
+
+    - name: Add Kubernetes apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+        filename: kubernetes
+        state: present
+
+    - name: Update apt cache after adding Kubernetes repo
+      apt:
+        update_cache: yes
 
     - name: Install kubelet, kubeadm, kubectl
       apt:
@@ -79,36 +102,45 @@
           - kubectl
         state: present
 
-    - name: Hold kube packages
+    - name: Hold kube packages to prevent auto-updates
       apt:
         name: "{{ item }}"
         state: present
-        
+        lock: yes
       loop:
         - kubelet
         - kubeadm
         - kubectl
 
+    # -----------------------
+    # Initialize Kubernetes
+    # -----------------------
     - name: Initialize Kubernetes control-plane (single node)
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       args:
         creates: /etc/kubernetes/admin.conf
 
     - name: Create kube config for ubuntu user
-      shell: |
-        mkdir -p /home/ubuntu/.kube
-        cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
-        chown -R ubuntu:ubuntu /home/ubuntu/.kube
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/ubuntu/.kube/config
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
 
     - name: Install Flannel CNI
       become_user: ubuntu
-      shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+      command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+      environment:
+        KUBECONFIG: /home/ubuntu/.kube/config
 
-    - name: Taint master to allow scheduling pods (single-node)
+    - name: Remove master taint to allow scheduling pods
       become_user: ubuntu
-      shell: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+      command: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+      environment:
+        KUBECONFIG: /home/ubuntu/.kube/config
 
     - name: Install Helm
-      shell: |
-        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
+      shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
