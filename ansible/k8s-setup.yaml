@@ -143,7 +143,7 @@
 
     - name: Remove master taint to allow scheduling pods
       become_user: ubuntu
-      command: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+      shell: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
       environment:
         KUBECONFIG: /home/ubuntu/.kube/config
 
@@ -151,4 +151,5 @@
       shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       args:
         creates: /usr/local/bin/helm
+
 
