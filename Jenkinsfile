@@ -88,26 +88,40 @@ pipeline {
     }
   
     stage('Deploy with Helm') {
-      steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
+  steps {
+    withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
                                        keyFileVariable: 'SSH_KEY',
                                        usernameVariable: 'SSH_USER')]) {
-          sh '''
-            EC2_IP=$(cat ec2_ip.txt)
+      sh '''
+        # Read EC2 IP
+        EC2_IP=$(cat ec2_ip.txt)
 
-            # Create helm directory on remote
-            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} "mkdir -p ~/helm"
+        # Ensure remote Helm directory exists
+        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} "mkdir -p ~/Helm"
 
-            # Copy only the financeme chart folder
-            scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r ${WORKSPACE}/Helm/financeme ${SSH_USER}@${EC2_IP}:~/helm/
+        # Copy only the financeme chart folder to remote
+        scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r Helm/financeme ${SSH_USER}@${EC2_IP}:~/Helm/
 
-            # Run helm upgrade/install
-            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
-            "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG}"
-         '''
+        # Run helm upgrade/install on the remote server
+        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
+          "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG}"
+
+        # Smoke test (hit NodePort on the node)
+        for i in {1..30}; do
+          if curl -sSf http://${EC2_IP}:30080/ >/dev/null; then
+            echo 'Smoke test passed'
+            exit 0
+          fi
+          echo 'Waiting for app...'
+          sleep 5
+        done
+        echo 'Smoke test failed'
+        exit 1
+      '''
     }
   }
 }
+
 
             
     stage('Terraform Destroy (optional)') {
