@@ -20,15 +20,5 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.port }}
-        readinessProbe:
-          httpGet:
-            path: /
-            port: {{ .Values.service.port }}
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /
-            port: {{ .Values.service.port }}
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        
+
