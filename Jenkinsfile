@@ -12,7 +12,6 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        // ✅ Correct syntax for Git checkout
         git branch: 'demo', url: 'https://github.com/maheshprince45/Capstone-Project.git'
       }
     }
@@ -24,14 +23,18 @@ pipeline {
       }
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
-          sh '''
-            pwd
-            ls -l
-            terraform init -input=false
-            terraform validate
-            terraform plan -out=tfplan
-            terraform apply -auto-approve tfplan
-          '''
+          dir('project-order') {
+            sh '''
+              echo "Current directory: $(pwd)"
+              echo "Listing Terraform files..."
+              ls -l
+
+              terraform init -input=false
+              terraform validate
+              terraform plan -out=tfplan
+              terraform apply -auto-approve tfplan
+            '''
+          }
         }
       }
     }
@@ -43,10 +46,12 @@ pipeline {
       }
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
-          sh '''
-            terraform init -input=false
-            terraform destroy -auto-approve
-          '''
+          dir('project-order') {
+            sh '''
+              terraform init -input=false
+              terraform destroy -auto-approve
+            '''
+          }
         }
       }
     }
