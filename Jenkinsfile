@@ -30,7 +30,7 @@ pipeline {
               mkdir -p $TMPDIR
               rm -rf .terraform .terraform.lock.hcl
               terraform init -reconfigure -input=false
-              terraform validate
+              terraform validate -no-color
               terraform plan 
               terraform apply -auto-approve 
             '''
