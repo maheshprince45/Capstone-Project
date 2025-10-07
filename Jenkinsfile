@@ -26,17 +26,13 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
           dir('project-order') {
             sh '''
-              export TMPDIR=/tmp
-          mkdir -p $TMPDIR
-          chmod 777 $TMPDIR
-
-          echo "Re-initializing Terraform..."
-          rm -rf .terraform .terraform.lock.hcl
-          terraform init -reconfigure -input=false
-
-          terraform validate
-          terraform plan -out=tfplan
-          terraform apply -auto-approve tfplan
+              export TMPDIR=$(pwd)/.tmp
+              mkdir -p $TMPDIR
+              rm -rf .terraform .terraform.lock.hcl
+              terraform init -reconfigure -input=false
+              terraform validate
+              terraform plan 
+              terraform apply -auto-approve 
             '''
           }
         }
