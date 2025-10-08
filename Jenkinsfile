@@ -86,7 +86,7 @@ pipeline {
       }
     }
   
-    stage('Deploy with Helm') {
+  stage('Deploy with Helm') {
   steps {
     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh',
                                        keyFileVariable: 'SSH_KEY',
@@ -95,23 +95,30 @@ pipeline {
         # Read EC2 IP
         EC2_IP=$(cat ec2_ip.txt)
 
-        # Ensure remote Helm directory exists
+        # Ensure Helm directory exists
         ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} "mkdir -p ~/Helm"
 
-        # Copy only the financeme chart folder to remote
-        scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r Helm/ ${SSH_USER}@${EC2_IP}:~/Helm/
+        # Copy only the financeme chart folder explicitly
+        scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -r Helm/financeme ${SSH_USER}@${EC2_IP}:~/Helm/
 
-        # Run helm upgrade/install on the remote server
-        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
-          "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG}"
+        # Verify folder on remote
+        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} "ls -l ~/Helm"
 
-        # Smoke test (hit NodePort on the node)
+        # Helm upgrade/install with retries
+        for i in {1..3}; do
+          ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
+            "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG}" && break
+          echo "Helm deploy failed, retrying in 10s..."
+          sleep 10
+        done
+
+        # Smoke test (wait for NodePort service)
         for i in {1..30}; do
           if curl -sSf http://${EC2_IP}:30080/ >/dev/null; then
             echo 'Smoke test passed'
             exit 0
           fi
-          echo 'Waiting for app...'
+          echo 'Waiting for app to be ready...'
           sleep 5
         done
         echo 'Smoke test failed'
@@ -120,6 +127,7 @@ pipeline {
     }
   }
 }
+
 
 
             
