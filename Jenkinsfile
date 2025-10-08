@@ -54,7 +54,7 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
           dir('terraform') {
             sh '''
-              terraform init -input=false
+               terraform init -input=false -reconfigure
               terraform validate
               terraform apply -auto-approve
               terraform output -raw ec2_public_ip > ../ec2_ip.txt
