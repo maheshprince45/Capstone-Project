@@ -32,7 +32,7 @@ pipeline {
 
     stage('Build & Push Docker Image') {
       environment {
-        IMAGE_TAG = "Healthcare"
+        IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE = "maheshprince/firstwebapp"
         REGISTRY_CREDENTIALS = credentials('Docker-cred')
       }
