@@ -11,7 +11,7 @@ pipeline {
   
 
   environment {
-    IMAGE_TAG = "Healthcare"
+    IMAGE_TAG = "${BUILD_NUMBER}"
     AWS_REGION = 'us-east-1'
   }
 
@@ -42,7 +42,7 @@ pipeline {
           docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
           echo "${REGISTRY_CREDENTIALS_PSW}" | docker login -u "${REGISTRY_CREDENTIALS_USR}" --password-stdin
           docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
-          docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+          
         '''
       }
     }
