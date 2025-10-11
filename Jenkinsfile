@@ -23,7 +23,7 @@ pipeline {
          TF_PLUGIN_TIMEOUT = '120'
       }
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
           dir('project-order') {
             sh '''
               export TMPDIR=$(pwd)/.tmp
@@ -45,7 +45,7 @@ pipeline {
         AWS_DEFAULT_REGION = "${AWS_REGION}"
       }
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred']]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
           dir('project-order') {
             sh '''
               terraform init -input=false
