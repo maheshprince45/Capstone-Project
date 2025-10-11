@@ -20,7 +20,7 @@ pipeline {
       steps {
         git credentialsId: 'Git-cred',
             url: 'https://github.com/maheshprince45/Capstone-Project.git',
-            branch: 'master'
+            branch: 'terraform'
       }
     }
 
