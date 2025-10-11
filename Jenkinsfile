@@ -31,7 +31,7 @@ pipeline {
               rm -rf .terraform .terraform.lock.hcl
               terraform init -reconfigure -input=false
               terraform validate -no-color
-              terraform plan 
+              terraform plan -var-file=dev.tfvars 
               terraform apply -auto-approve 
             '''
           }
