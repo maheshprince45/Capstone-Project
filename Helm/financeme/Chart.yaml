@@ -1,8 +1,9 @@
 apiVersion: v2
-name: Banking
-description: Banking app
+name: banking
+description: banking app
 type: application
 version: 0.1.0
 appVersion: "1.0"
+
 
 
