@@ -1,6 +1,7 @@
 apiVersion: v2
-name: financeme
-description: FinanceMe Banking Application
+name: Bankme
+description: Banking app
 type: application
 version: 0.1.0
 appVersion: "1.0"
+
