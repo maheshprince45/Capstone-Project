@@ -19,7 +19,7 @@ module "sg" {
 
 
 module "ec2" {
-  source        = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/ec2/"
+  source        = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/ec2"
   project       = "${var.name}-web"s3://my-terraform-modules-bucket-dish/ec2/
   ami           = "ami-0261755bbcb8c4a84"
   instance_type = var.instance_type
