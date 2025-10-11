@@ -1,24 +1,35 @@
+##############################################
+# VPC MODULE
+##############################################
 module "vpc" {
-  source          = "../aws-modules/vpc"
-  name            = var.name
+  source          = "s3://my-terraform-modules-bucket-dish/vpc/"
+  project         = var.name
   vpc_cidr        = var.vpc_cidr
-  azs             = var.azs
-  public_subnets  = var.public_subnets
+  public_subnet_cidr = var.public_subnets[0]
+  tags            = { Project = var.name, Owner = "devops" }
 }
 
+##############################################
+# SECURITY GROUP MODULE (optional)
+##############################################
+module "sg" {
+  source           = "s3://my-terraform-modules-bucket-dish/security-group/"
+  project          = var.name
+  vpc_id           = module.vpc.vpc_id
+  allowed_ssh_cidr = "0.0.0.0/0"
+  tags             = { Project = var.name, Owner = "devops" }
+}
+
+##############################################
+# EC2 MODULE
+##############################################
 module "ec2" {
-  source         = "../aws-modules/ec2"
-  name           = "${var.name}-web"
-  subnet_id      = module.vpc.public_subnet_ids[0]
-  vpc_id         = module.vpc.vpc_id
-  instance_type  = var.instance_type
-  key_name       = var.key_name
-}
-
-output "vpc_id" {
-  value = module.vpc.vpc_id
-}
-
-output "instance_public_ip" {
-  value = module.ec2.public_ip
+  source        = ""
+  project       = "${var.name}-web"s3://my-terraform-modules-bucket-dish/ec2/
+  ami           = "ami-0261755bbcb8c4a84"
+  instance_type = var.instance_type
+  subnet_id     = module.vpc.subnet_id
+  sg_id         = module.sg.sg_id
+  ssh_key_name  = var.key_name
+  tags          = { Project = var.name, Owner = "devops" }
 }
