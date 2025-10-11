@@ -2,7 +2,8 @@
 # VPC MODULE
 ##############################################
 module "vpc" {
-  source          = "s3://my-terraform-modules-bucket-dish/vpc/"
+  source          = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/vpc"
+"
   project         = var.name
   vpc_cidr        = var.vpc_cidr
   public_subnet_cidr = var.public_subnets[0]
@@ -13,7 +14,7 @@ module "vpc" {
 # SECURITY GROUP MODULE (optional)
 ##############################################
 module "sg" {
-  source           = "s3://my-terraform-modules-bucket-dish/security-group/"
+  source           = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/security-group/"
   project          = var.name
   vpc_id           = module.vpc.vpc_id
   allowed_ssh_cidr = "0.0.0.0/0"
@@ -24,7 +25,7 @@ module "sg" {
 # EC2 MODULE
 ##############################################
 module "ec2" {
-  source        = ""
+  source        = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/ec2/"
   project       = "${var.name}-web"s3://my-terraform-modules-bucket-dish/ec2/
   ami           = "ami-0261755bbcb8c4a84"
   instance_type = var.instance_type
