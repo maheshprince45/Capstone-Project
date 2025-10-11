@@ -7,11 +7,12 @@ image:
 
 service:
   type: NodePort
-  port: 8080
+  port: 8081
   targetPort: 8081
   nodePort: 30081
 
 resources: {}
+
 
 
 
