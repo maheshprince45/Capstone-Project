@@ -9,8 +9,9 @@ service:
   type: NodePort
   port: 8080
   targetPort: 8081
-  nodePort: 30080
+  nodePort: 30081
 
 resources: {}
+
 
 
