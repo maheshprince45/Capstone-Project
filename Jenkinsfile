@@ -11,7 +11,7 @@ pipeline {
   
 
   environment {
-    IMAGE_TAG = "Banking"
+    IMAGE_TAG = "${BUILD_NUMBER}"
     AWS_REGION = 'us-east-1'
   }
 
@@ -32,7 +32,7 @@ pipeline {
 
     stage('Build & Push Docker Image') {
       environment {
-        IMAGE_TAG = "Banking"
+        IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE = "maheshprince/firstwebapp"
         REGISTRY_CREDENTIALS = credentials('Docker-cred')
       }
