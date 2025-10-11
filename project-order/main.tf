@@ -10,7 +10,7 @@ module "vpc" {
 
 
 module "sg" {
-  source           = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/security-group/"
+  source           = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/security-group"
   project          = var.name
   vpc_id           = module.vpc.vpc_id
   allowed_ssh_cidr = "0.0.0.0/0"
