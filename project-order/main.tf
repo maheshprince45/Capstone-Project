@@ -1,6 +1,4 @@
-##############################################
-# VPC MODULE
-##############################################
+
 module "vpc" {
   source          = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/vpc"
 "
@@ -10,9 +8,7 @@ module "vpc" {
   tags            = { Project = var.name, Owner = "devops" }
 }
 
-##############################################
-# SECURITY GROUP MODULE (optional)
-##############################################
+
 module "sg" {
   source           = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/security-group/"
   project          = var.name
@@ -21,9 +17,7 @@ module "sg" {
   tags             = { Project = var.name, Owner = "devops" }
 }
 
-##############################################
-# EC2 MODULE
-##############################################
+
 module "ec2" {
   source        = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/ec2/"
   project       = "${var.name}-web"s3://my-terraform-modules-bucket-dish/ec2/
