@@ -107,7 +107,7 @@ pipeline {
         # Helm upgrade/install with retries
         for i in {1..3}; do
           ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} \
-            "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG}" && break
+            "helm upgrade --install financeme ~/Helm/financeme --set image.tag=${IMAGE_TAG} --force" && break
           echo "Helm deploy failed, retrying in 10s..."
           sleep 10
         done
