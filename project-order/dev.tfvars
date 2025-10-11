@@ -6,3 +6,4 @@ azs            = ["us-east-1a", "us-east-1b"]
 public_subnets = ["10.10.1.0/24", "10.10.2.0/24"]
 instance_type  = "t3.micro"
 key_name       = "my-keypair"
+aws_profile = "mahesh"
