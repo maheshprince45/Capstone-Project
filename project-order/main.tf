@@ -3,6 +3,7 @@ module "vpc" {
   source          = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/vpc"
   project         = var.name
   vpc_cidr        = var.vpc_cidr
+   azs            = ["us-east-1a", "us-east-1b"]
   public_subnet_cidr = var.public_subnets[0]
   tags            = { Project = var.name, Owner = "devops" }
 }
