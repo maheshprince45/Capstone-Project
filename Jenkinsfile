@@ -49,7 +49,8 @@ pipeline {
           dir('project-order') {
             sh '''
               terraform init -input=false
-              terraform destroy -auto-approve
+             terraform destroy -auto-approve -var-file=dev.tfvars
+
             '''
           }
         }
