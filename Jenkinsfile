@@ -6,7 +6,7 @@ pipeline {
   }
 
   environment {
-    AWS_REGION = 'us-east-1'
+    AWS_REGION   = 'us-east-1'
     ENVIRONMENTS = "dev qa"
   }
 
@@ -31,9 +31,9 @@ pipeline {
 
               dir('project-order') {
                 sh """
-                  export AWS_DEFAULT_REGION=${AWS_REGION}
-                  export TMPDIR=$(pwd)/.tmp
-                  mkdir -p \$TMPDIR
+                  export AWS_DEFAULT_REGION=\\$AWS_REGION
+                  export TMPDIR=\\$(pwd)/.tmp
+                  mkdir -p \\$TMPDIR
                   rm -rf .terraform .terraform.lock.hcl
 
                   echo "🔹 Initializing Terraform for ${envName}"
