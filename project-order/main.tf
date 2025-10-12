@@ -47,6 +47,5 @@ module "ec2" {
   subnet_id     = module.vpc.subnet_id
   sg_id         = module.sg.sg_id
   ssh_key_name  = var.key_name
-  availability_zone = local.chosen_az
   tags          = { Project = var.name, Owner = "devops" }
 }
