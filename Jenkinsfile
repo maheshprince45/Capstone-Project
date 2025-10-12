@@ -40,23 +40,27 @@ pipeline {
     }
 
     stage('Terraform Destroy (optional)') {
-      when { expression { return params.DESTROY_INFRA } }
-      environment {
-        AWS_DEFAULT_REGION = "${AWS_REGION}"
-      }
-      steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-          dir('project-order') {
-            sh '''
-              terraform init -input=false
-             terraform destroy -auto-approve -var-file=dev.tfvars
-
-            '''
-          }
-        }
+  when { expression { return params.DESTROY_INFRA } }
+  environment {
+    AWS_DEFAULT_REGION = "${AWS_REGION}"
+    TF_PLUGIN_TIMEOUT  = '120'
+  }
+  steps {
+    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
+      dir('project-order') {
+        sh '''
+          export TMPDIR=$(pwd)/.tmp
+          mkdir -p $TMPDIR
+          terraform init -reconfigure -input=false
+          terraform validate -no-color
+          terraform plan -destroy -var-file=dev.tfvars
+          terraform destroy -auto-approve -var-file=dev.tfvars
+        '''
       }
     }
   }
+}
+
 
   post {
     always {
