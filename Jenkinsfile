@@ -3,11 +3,11 @@ pipeline {
 
   parameters {
     booleanParam(name: 'DESTROY_INFRA', defaultValue: false, description: 'Destroy infra after pipeline')
+    string(name: 'ENVIRONMENTS', defaultValue: 'dev,qa', description: 'Comma-separated list of environments to process (e.g., dev,qa)')
   }
 
   environment {
-    AWS_REGION   = 'us-east-1'
-    ENVIRONMENTS = "dev qa"
+    AWS_REGION = 'us-east-1'
   }
 
   stages {
@@ -22,9 +22,10 @@ pipeline {
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
           script {
-            def envList = ENVIRONMENTS.split(" ")
+            def envList = params.ENVIRONMENTS.tokenize(',')  // Split comma-separated list
 
             for (envName in envList) {
+              envName = envName.trim() // Remove extra spaces
               echo "==========================================="
               echo "🔹 Processing Environment: ${envName}"
               echo "==========================================="
@@ -69,7 +70,7 @@ pipeline {
 
   post {
     always {
-      echo '✅ Pipeline completed for all environments.'
+      echo '✅ Pipeline completed for all selected environments.'
       cleanWs()
     }
   }
