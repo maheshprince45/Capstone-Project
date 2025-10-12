@@ -20,7 +20,7 @@ module "sg" {
 module "ec2" {
   source        = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/ec2"
   project       = "${var.name}-web"
-  ami           = ami = "ami-0fb0b230890ccd1e6"
+  ami           = "ami-0fb0b230890ccd1e6"
   instance_type = var.instance_type
   subnet_id     = module.vpc.subnet_id
   sg_id         = module.sg.sg_id
