@@ -19,56 +19,54 @@ pipeline {
     }
 
     stage('Terraform Execution per Environment') {
-  steps {
-    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-      script {
-        // List of environments from parameter
-        def envList = params.ENVIRONMENTS.split(" ")
+      steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
+          script {
+            def envList = params.ENVIRONMENTS.split(',')
 
-        for (envName in envList) {
-          echo "==========================================="
-          echo "🔹 Processing Environment: ${envName}"
-          echo "==========================================="
+            for (envName in envList) {
+              envName = envName.trim()
+              echo "==========================================="
+              echo "🔹 Processing Environment: ${envName}"
+              echo "==========================================="
 
-          dir('project-order') {
-            // Terraform init, workspace, and validate
-            sh '''
-              export AWS_DEFAULT_REGION=$AWS_REGION
-              export TMPDIR=$(pwd)/.tmp
-              mkdir -p $TMPDIR
-              rm -rf .terraform .terraform.lock.hcl
+              dir('project-order') {
+                sh '''
+                  export AWS_DEFAULT_REGION=$AWS_REGION
+                  export TMPDIR=$(pwd)/.tmp
+                  mkdir -p $TMPDIR
+                  rm -rf .terraform .terraform.lock.hcl
 
-              echo "🔹 Initializing Terraform for ${envName}"
-              terraform init -reconfigure -input=false
+                  echo "🔹 Initializing Terraform for ${envName}"
+                  terraform init -reconfigure -input=false
 
-              echo "🔹 Selecting/Creating workspace for ${envName}"
-              terraform workspace new ${envName} || terraform workspace select ${envName}
+                  echo "🔹 Selecting/Creating workspace for ${envName}"
+                  terraform workspace new ${envName} || terraform workspace select ${envName}
 
-              terraform validate -no-color
-            '''.replace('${envName}', envName) // Replace Groovy variable manually
+                  terraform validate -no-color
+                '''.replace('${envName}', envName)
 
-            if (!params.DESTROY_INFRA) {
-              sh '''
-                echo "🔹 Running plan for ${envName}"
-                terraform plan -var-file=${envName}.tfvars -no-color
+                if (!params.DESTROY_INFRA) {
+                  sh '''
+                    echo "🔹 Running plan for ${envName}"
+                    terraform plan -var-file=${envName}.tfvars -no-color
 
-                echo "🔹 Applying changes for ${envName}"
-                terraform apply -auto-approve -var-file=${envName}.tfvars
-              '''.replace('${envName}', envName)
-            } else {
-              sh '''
-                echo "⚠️ Destroying resources in ${envName} environment"
-                terraform destroy -auto-approve -var-file=${envName}.tfvars
-              '''.replace('${envName}', envName)
+                    echo "🔹 Applying changes for ${envName}"
+                    terraform apply -auto-approve -var-file=${envName}.tfvars
+                  '''.replace('${envName}', envName)
+                } else {
+                  sh '''
+                    echo "⚠️ Destroying resources in ${envName} environment"
+                    terraform destroy -auto-approve -var-file=${envName}.tfvars
+                  '''.replace('${envName}', envName)
+                }
+              }
             }
           }
         }
       }
     }
-  }
-}
-
-
+  } // <--- end of stages block
 
   post {
     always {
@@ -76,5 +74,4 @@ pipeline {
       cleanWs()
     }
   }
-}
 }
