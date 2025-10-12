@@ -7,64 +7,69 @@ pipeline {
 
   environment {
     AWS_REGION = 'us-east-1'
+    ENVIRONMENTS = "dev qa"
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         git branch: 'demo', url: 'https://github.com/maheshprince45/Capstone-Project.git'
       }
     }
 
-    stage('Terraform Provision EC2 (Ubuntu)') {
-      when { expression { return !params.DESTROY_INFRA } }
-      environment {
-        AWS_DEFAULT_REGION = "${AWS_REGION}"
-        TF_PLUGIN_TIMEOUT  = '120'
-      }
+    stage('Terraform Execution per Environment') {
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-          dir('project-order') {
-            sh '''
-              export TMPDIR=$(pwd)/.tmp
-              mkdir -p $TMPDIR
-              rm -rf .terraform .terraform.lock.hcl
-              terraform init -reconfigure -input=false
-              terraform validate -no-color
-              terraform plan -var-file=dev.tfvars
-              terraform apply -auto-approve
-            '''
-          }
-        }
-      }
-    }
+          script {
+            def envList = ENVIRONMENTS.split(" ")
 
-    stage('Terraform Destroy (optional)') {
-      when { expression { return params.DESTROY_INFRA } }
-      environment {
-        AWS_DEFAULT_REGION = "${AWS_REGION}"
-        TF_PLUGIN_TIMEOUT  = '120'
-      }
-      steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-cred-financeme']]) {
-          dir('project-order') {
-            sh '''
-              export TMPDIR=$(pwd)/.tmp
-              mkdir -p $TMPDIR
-              terraform init -reconfigure -input=false
-              terraform validate -no-color
-              terraform plan -destroy -var-file=dev.tfvars
-              terraform destroy -auto-approve -var-file=dev.tfvars
-            '''
+            for (envName in envList) {
+              echo "==========================================="
+              echo "🔹 Processing Environment: ${envName}"
+              echo "==========================================="
+
+              dir('project-order') {
+                sh """
+                  export AWS_DEFAULT_REGION=${AWS_REGION}
+                  export TMPDIR=$(pwd)/.tmp
+                  mkdir -p \$TMPDIR
+                  rm -rf .terraform .terraform.lock.hcl
+
+                  echo "🔹 Initializing Terraform for ${envName}"
+                  terraform init -reconfigure -input=false
+
+                  echo "🔹 Selecting/Creating workspace for ${envName}"
+                  terraform workspace new ${envName} || terraform workspace select ${envName}
+
+                  terraform validate -no-color
+                """
+
+                if (!params.DESTROY_INFRA) {
+                  sh """
+                    echo "🔹 Running plan for ${envName}"
+                    terraform plan -var-file=${envName}.tfvars -no-color
+
+                    echo "🔹 Applying changes for ${envName}"
+                    terraform apply -auto-approve -var-file=${envName}.tfvars
+                  """
+                } else {
+                  sh """
+                    echo "⚠️ Destroying resources in ${envName} environment"
+                    terraform destroy -auto-approve -var-file=${envName}.tfvars
+                  """
+                }
+              }
+            }
           }
         }
       }
     }
-  } // <-- This closes the stages block
+  }
 
   post {
     always {
-      echo 'Pipeline completed.'
+      echo '✅ Pipeline completed for all environments.'
       cleanWs()
     }
   }
