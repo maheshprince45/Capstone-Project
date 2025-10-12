@@ -17,6 +17,27 @@ module "sg" {
 }
 
 
+# Get all available AZs in the region
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+# Find AZs that support the selected instance type
+data "aws_instance_type_offerings" "available" {
+  location_type = "availability-zone"
+
+  filter {
+    name   = "instance-type"
+    values = [var.instance_type]
+  }
+}
+
+# Pick the first AZ that supports the instance type
+locals {
+  chosen_az = data.aws_instance_type_offerings.available.instance_type_offerings[0].location
+}
+
+
 module "ec2" {
   source        = "s3::https://s3.amazonaws.com/my-terraform-modules-bucket-dish/ec2"
   project       = "${var.name}-web"
@@ -25,5 +46,6 @@ module "ec2" {
   subnet_id     = module.vpc.subnet_id
   sg_id         = module.sg.sg_id
   ssh_key_name  = var.key_name
+  availability_zone = local.chosen_az
   tags          = { Project = var.name, Owner = "devops" }
 }
