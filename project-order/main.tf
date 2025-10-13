@@ -5,7 +5,6 @@ module "vpc" {
   vpc_cidr        = var.vpc_cidr
   public_subnet_cidr = var.public_subnets[0]
   tags            = { Project = var.name, Owner = "devops" }
-  azs            = var.azs
 }
 
 
