@@ -3,20 +3,25 @@ replicaCount: 2
 image:
   repository: maheshprince/firstwebapp
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
-  type: NodePort
-  port: 8081
-  targetPort: 8081
-  nodePort: 30081
+  type: LoadBalancer
+  port: 80
 
-resources: {}
+env:
+  SPRING_PROFILES_ACTIVE: "prod"
+  APP_MESSAGE: "Welcome to FinanceMe App"
 
+secret:
+  DB_USERNAME: root
+  DB_PASSWORD: mysecurepassword
 
+blueGreen:
+  version: blue      # change to green during rollout
 
-
-
-
-
-
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  cpu: 60
