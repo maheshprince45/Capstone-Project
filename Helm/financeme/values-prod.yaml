@@ -1,0 +1,41 @@
+# Production values
+replicaCount: 2
+
+image:
+  repository: "954976295939.dkr.ecr.us-east-1.amazonaws.com/devops-web"
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 80
+
+env:
+  SPRING_PROFILES_ACTIVE: "prod"
+  APP_MESSAGE: "FinanceMe (prod)"
+
+secret:
+  # DO NOT store real credentials here. Use Jenkins/Secrets Manager and inject at deploy time.
+  DB_USERNAME: "prod_user"
+  DB_PASSWORD: "prod_password"
+
+blueGreen:
+  version: blue
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  cpu: 60
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
