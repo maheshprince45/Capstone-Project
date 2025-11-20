@@ -1,0 +1,7 @@
+{{- define "financeme.name" -}}
+financeme
+{{- end }}
+
+{{- define "financeme.fullname" -}}
+{{ include "financeme.name" . }}-{{ .Release.Name }}
+{{- end }}
