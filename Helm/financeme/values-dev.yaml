@@ -1,0 +1,41 @@
+# Development values
+replicaCount: 1
+
+image:
+  repository: "954976295939.dkr.ecr.us-east-1.amazonaws.com/devops-web"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+
+env:
+  SPRING_PROFILES_ACTIVE: "dev"
+  APP_MESSAGE: "FinanceMe (dev)"
+
+secret:
+  # Placeholder values — override securely in CI or via Kubernetes Secret
+  DB_USERNAME: "dev_user"
+  DB_PASSWORD: "dev_password"
+
+blueGreen:
+  version: blue
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  cpu: 60
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "300m"
+    memory: "512Mi"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
