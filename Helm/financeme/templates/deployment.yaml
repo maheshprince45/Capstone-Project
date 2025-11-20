@@ -1,24 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ include "financeme.fullname" . }}-{{ .Values.blueGreen.version }}
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ include "financeme.name" . }}
+    version: {{ .Values.blueGreen.version }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: {{ include "financeme.name" . }}
+      version: {{ .Values.blueGreen.version }}
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: {{ include "financeme.name" . }}
+        version: {{ .Values.blueGreen.version }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: financeme
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.service.port }}
-        
-
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: {{ include "financeme.fullname" . }}-config
+        - secretRef:
+            name: {{ include "financeme.fullname" . }}-secret
