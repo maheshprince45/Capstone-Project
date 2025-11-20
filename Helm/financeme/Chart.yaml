@@ -1,9 +1,6 @@
 apiVersion: v2
-name: banking
-description: banking app
+name: financeme
+description: FinanceMe Application Helm Chart
 type: application
-version: 0.1.0
+version: 1.0.0
 appVersion: "1.0"
-
-
-
