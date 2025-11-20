@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         AWS_REGION = "us-east-1"
-        ECR_REPO = "954976295939.dkr.ecr.us-east-1.amazonaws.com/devops-web"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        ECR_REPO   = "954976295939.dkr.ecr.us-east-1.amazonaws.com/devops-web"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
         CHART_PATH = "Helm/financeme"
     }
 
@@ -18,6 +18,17 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Build Maven Artifact') {
+            steps {
+                sh '''
+                echo "Building Maven project..."
+                mvn -q -DskipTests clean package
+                echo "Listing target/ folder:"
+                ls -l target/
+                '''
             }
         }
 
@@ -46,6 +57,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
+                echo "Building Docker image..."
                 docker build -t ${ECR_REPO}:${IMAGE_TAG} .
                 '''
             }
@@ -54,6 +66,7 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 sh '''
+                echo "Pushing image to ECR..."
                 docker push ${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
@@ -62,9 +75,12 @@ pipeline {
         stage('Update kubeconfig') {
             steps {
                 sh '''
+                echo "Updating kubeconfig for EKS cluster..."
                 aws eks update-kubeconfig \
                     --region ${AWS_REGION} \
                     --name ${CLUSTER_NAME}
+
+                echo "Cluster Nodes:"
                 kubectl get nodes
                 '''
             }
@@ -73,10 +89,11 @@ pipeline {
         stage('Helm Deploy') {
             steps {
                 script {
-
                     def valuesFile = "Helm/financeme/values-${ENV}.yaml"
 
                     sh """
+                    echo 'Deploying via Helm...'
+
                     helm upgrade --install myapp ${CHART_PATH} \
                         --namespace myapp-${ENV} \
                         --create-namespace \
@@ -84,6 +101,9 @@ pipeline {
                         --set image.tag=${IMAGE_TAG} \
                         -f ${valuesFile}
                     """
+
+                    sh "kubectl get pods -n myapp-${ENV}"
+                    sh "kubectl get svc -n myapp-${ENV}"
                 }
             }
         }
