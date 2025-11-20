@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "financeme.fullname" . }}-config
+data:
+  SPRING_PROFILES_ACTIVE: {{ .Values.env.SPRING_PROFILES_ACTIVE | quote }}
+  APP_MESSAGE: {{ .Values.env.APP_MESSAGE | quote }}
