@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         AWS_REGION = "us-east-1"
-        ECR_REPO = "123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp"
+        ECR_REPO = "954976295939.dkr.ecr.us-east-1.amazonaws.com/devops-web"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        CHART_PATH = "helm/myapp"
+        CHART_PATH = "Helm/financeme"
     }
 
     parameters {
